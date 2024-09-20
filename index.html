@@ -18,7 +18,7 @@
 
         <div class="row">
             <div class="col-4" style="background-color: beige; max-height: max-content; position: relative;">
-                <div class="row align-items-center " style="margin: 20px 0px 20px 120px"> <!--top right -bottom  left-->
+                <div class="row align-items-center " style="margin: 20px 0px 20px 120px">
                     <div class="col-auto" >
                         <img src="reading.png" alt="user" style="height: 100px;">
                     </div>
@@ -49,14 +49,7 @@
                         <label class="form-check-label" for="other" style="margin: 5px;" >Other</label>
                         </div>
                     </div>
-                    
-                    <!-- <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <div class="form-floating">
-                            <textarea class="form-control" placeholder="Enter your address here" id="address"></textarea>
-                            <label for="address">Enter your address here</label>
-                        </div>
-                    </div> -->
+
                     <div class="mb-3">
                         <label for="address" class="form-label">Address</label>
                         <textarea id="address" style="width: 250px; height: 70px; float:right;" placeholder="Enter your address" required></textarea>
@@ -72,7 +65,6 @@
                         <option value="MECH">Mechanical</option>
                         </select>
                     </div>
-        
 
                     <div class="mb-3">
                         <label class="form-label">Hobbies</label>
@@ -89,7 +81,6 @@
                             <input class="form-check-input" type="checkbox" id="hobby4" value="Traveling">
                             <label class="form-check-label" for="hobby4">Traveling</label>
                         </div>
-                       
                     </div>    
 
                     <div class="mb-3">
@@ -109,14 +100,12 @@
                         <h3>Details</h3>
                     </div>
                 </div>
-                
 
                 <form class="form-inline text-center" style="margin-bottom: 20px;">
                     <input class="mr-sm-2 " type="search" placeholder="Search" aria-label="Search">
                     <button class="btn btn-outline-success mr-sm-2" type="submit">Search</button>
-                  </form>
+                </form>
 
-                
                 <div class="row" style="margin: 0px 10px 0px 10px;">
                     <div class="col">
                         <table class="table table-bordered" id="studentTable">
@@ -131,9 +120,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Data -->
+                                <!-- Data  -->
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-primary" onclick="deleteStudent()">Delete</button>
+                        <button type="button" class="btn btn-primary" onclick="clearStudent()">Clear</button>
                     </div>
                 </div>
             </div>
@@ -141,87 +134,78 @@
     </div>
 
     <script>
-    function validateName(name) {
-        const namePattern = /^[A-Za-z\s]+$/;
-        if (name.trim() === "") {
-            alert("Name is required.");
-            return false;
-        } else if (!namePattern.test(name)) {
-            alert("Name can only contain letters and spaces.");
-            return false;
-        } else if (name.length < 3 || name.length > 50) {
-            alert("Name must be between 3 and 50 characters.");
-            return false;
-        }
-        return true;
-    }
+        let selectedRow = null;
 
-    function validatePRN(prn){
-        const prnPattern = /^[0-9\s]+$/;
+        document.getElementById('studentTable').addEventListener('click', function(event) {
+            const target = event.target;
+            if (target.tagName === 'TD') {
+                const row = target.parentElement;
+                selectedRow = row;
+                document.getElementById('name').value = row.cells[0].textContent;
+                document.getElementById('prn').value = row.cells[1].textContent;
 
-        if(prn.trim() === ""){
-            alert("PRN is required.");
-            return false;
-        }
-        else if(!prnPattern.test(prn)){
-            alert("PRN contains only Numbers.")
-        }
-        return true;
-    }
+                const gender = row.cells[2].textContent;
+                document.querySelector(`input[name="gender"][value="${gender}"]`).checked = true;
 
+                document.getElementById('address').value = row.cells[3].textContent;
+                document.getElementById('branch').value = row.cells[4].textContent;
 
-
-    function addStudent(event) {
-        event.preventDefault(); 
-
-
-        const name = document.getElementById('name').value;
-        const prn = document.getElementById('prn').value;
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-        const address = document.getElementById('address').value;
-        const branch = document.getElementById('branch').value;
-
-        if (!validateName(name)) {
-            document.getElementById('name').focus(); 
-            return;
-        }
-
-        if(!validatePRN(prn)){
-            document.getElementById('prn').focus();
-            return;
-        }
-        
-        const fileInput = document.getElementById('formFile');
-        const file = fileInput.files[0];
-        const allowedExtensions = /(\.jpg|\.png)$/i;
-
-        if (file && !allowedExtensions.exec(file.name)) {
-           alert('Please upload a file with .png, .jpg extension.');
-           fileInput.value = ''; 
-           return;
-        }
-
-        const hobbies = [];
-        document.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
-            hobbies.push(checkbox.value);
+                const hobbies = row.cells[5].textContent.split(', ');
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = hobbies.includes(checkbox.value);
+                });
+            }
         });
 
-        
-        const table = document.getElementById('studentTable').querySelector('tbody');
-        const row = table.insertRow();
+        function addStudent(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const prn = document.getElementById('prn').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const address = document.getElementById('address').value;
+            const branch = document.getElementById('branch').value;
 
-        // Insert cells
-        row.insertCell(0).textContent = name;
-        row.insertCell(1).textContent = prn;
-        row.insertCell(2).textContent = gender;
-        row.insertCell(3).textContent = address;
-        row.insertCell(4).textContent = branch;
-        row.insertCell(5).textContent = hobbies.join(', ');
+            const hobbies = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                hobbies.push(checkbox.value);
+            });
 
-        // Clear form after submission
-        document.getElementById('studentForm').reset();
-    }
-</script>
+            if (selectedRow === null) {
+                const table = document.getElementById('studentTable').getElementsByTagName('tbody')[0];
+                const newRow = table.insertRow();
+                newRow.insertCell(0).textContent = name;
+                newRow.insertCell(1).textContent = prn;
+                newRow.insertCell(2).textContent = gender;
+                newRow.insertCell(3).textContent = address;
+                newRow.insertCell(4).textContent = branch;
+                newRow.insertCell(5).textContent = hobbies.join(', ');
+            } else {
+                selectedRow.cells[0].textContent = name;
+                selectedRow.cells[1].textContent = prn;
+                selectedRow.cells[2].textContent = gender;
+                selectedRow.cells[3].textContent = address;
+                selectedRow.cells[4].textContent = branch;
+                selectedRow.cells[5].textContent = hobbies.join(', ');
+                selectedRow = null;
+            }
+            document.getElementById('studentForm').reset();
+        }
+
+        function deleteStudent() {
+            if (selectedRow !== null) {
+                selectedRow.remove();
+                selectedRow = null;
+                document.getElementById('studentForm').reset();
+            } else {
+                alert('Please select a row to delete.');
+            }
+        }
+
+        function clearStudent() {
+            document.getElementById('studentForm').reset();
+            selectedRow = null;
+        }
+    </script>
 
 </body>
 </html>
